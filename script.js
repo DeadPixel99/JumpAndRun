@@ -1,4 +1,4 @@
-//(function () {
+(function () {
     //canvas
     const canvas = document.getElementById("game-canvas");
     const playBtn = document.getElementById("play-btn");
@@ -17,7 +17,7 @@
     const playerCurrX = 60;
     let playerFrame = 0;
     let groundShift = 0;
-    let speed = 10;
+    let speed = 1;
     let playerAnimationCounter = 0;
 
     let inJump = false;
@@ -45,7 +45,7 @@
         if(enemies.length == 0) {
             eQuantity = getRandomInt(5);
             for(let i = 0; i < eQuantity; i++) {
-                enemies.push({x: baseEnemyX + (i * (getRandomInt(width) + 100)), y: 40});
+                enemies.push({x: baseEnemyX + (i * (getRandomInt(width) + 200)), y: 40});
             }
         }
     }
@@ -98,6 +98,9 @@
         if(groundShift > 17) {
             groundShift = 0;
         }
+        if(score % Math.pow(10, speed) == 0) {
+            speed++;
+        }
         inJump && processJump();
         getRandomInt(100) < 5 && randomCloud();
         processEnemy();
@@ -118,6 +121,7 @@
         enemies = [];
         inJump = false;
         playerCurrY = 0;
+        speed = 1;
         gameRunning = false;
         makeFrame();
         document.getElementById('menu').classList.toggle('sprites');
@@ -147,4 +151,4 @@
     makeFrame();
     playBtn.onclick = play;
 
-//})();
+})();

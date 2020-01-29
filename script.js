@@ -1,6 +1,7 @@
 //(function () {
     //canvas
     const canvas = document.getElementById("game-canvas");
+    const playBtn = document.getElementById("play-btn");
     const ctx = canvas.getContext('2d');
     const height = 450;
     const width = 800;
@@ -11,7 +12,6 @@
     //live objects values
     const playerMaxX = 20;
     const baseEnemyX = width;
-    let gameLoop = null;
     let enemies = [{x: baseEnemyX, y: 40}];
     let playerCurrY = 0;
     const playerCurrX = 60;
@@ -45,9 +45,21 @@
         if(enemies.length == 0) {
             eQuantity = getRandomInt(5);
             for(let i = 0; i < eQuantity; i++) {
-                enemies.push({x: baseEnemyX + (eQuantity * (getRandomInt(width)) + 100), y: 40});
+                enemies.push({x: baseEnemyX + (i * (getRandomInt(width) + 100)), y: 40});
             }
         }
+    }
+
+    function play() {
+        document.getElementById('menu').classList.toggle('sprites');
+        score = 0;
+        gameRunning = true;
+        window.requestAnimationFrame(loop);
+        canvas.onclick = () => {
+            if(!inJump) {
+                inJump = true;
+            }
+        };
     }
     
     function makeFrame(playerY = 0, playerX = 0, groundShift = 0) {
@@ -95,16 +107,24 @@
     function processEnemy() {
         enemies.forEach(i => {
             if(i.x <= playerCurrX + 60 && i.x >= playerCurrX && i.y > playerCurrY) {
-                alert('Game Over');
-                enemies = [];
-                gameRunning = false;
-                makeFrame();
+                gameOver();
             }
         });
     }
 
+    function gameOver() {
+        alert('Game Over');
+        canvas.onclick = null;
+        enemies = [];
+        inJump = false;
+        playerCurrY = 0;
+        gameRunning = false;
+        makeFrame();
+        document.getElementById('menu').classList.toggle('sprites');
+    }
+
     function processJump() {
-        playerCurrY += jumpUp ? 3 : -3;
+        playerCurrY += jumpUp ? 4 : -4;
         if(playerCurrY > 120 && jumpUp) {
             jumpUp = false;
         }
@@ -119,22 +139,12 @@
     canvas.width = width;
     ctx.imageSmoothingEnabled= false;
 
-    canvas.onclick = () => {
-        if(!inJump) {
-            inJump = true;
-        }
-    };
-
     function loop() {
         tick();
         gameRunning && window.requestAnimationFrame(loop);
     }
 
-    // TODO Change to requestAnimationFrame + speed == fps
     makeFrame();
-    // gameLoop = setInterval(() => {
-    //     tick();
-    // }, 16);
-    window.requestAnimationFrame(loop);
+    playBtn.onclick = play;
 
 //})();

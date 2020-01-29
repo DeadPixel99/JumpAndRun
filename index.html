@@ -2,7 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>JumpAndJump</title>
+    <title>RunAndJump</title>
+    <link rel="stylesheet" type="text/css" href="styles.css">
     <script defer src="script.js"></script>
 </head>
 <body>
@@ -16,40 +17,9 @@
         <img id="sEnm1" src="res/stump.png"/>
     </div>
     <h2 class="score-board">Score: <span id="score">0</span></h2>
-<!--    <button id="play-btn">Play</button>-->
+    <div id="menu">
+        <h2 style="text-align: center; position: fixed; top: 5%; width: 100%;font-family: 'Comic Sans MS'; font-size: 5em; margin-left: 5px">Run and Jump</h2>
+        <div  id="play-btn" class="round-button"><div class="round-button-circle"><a href="#" class="round-button">Play</a></div></div>
+    </div>
 </body>
-<style>
-    body {
-        margin: 0;
-        padding: 0;
-        overflow: hidden;
-    }
-
-    .score-board {
-        position: absolute;
-        right: 8%;
-        top: 0;
-        font-size: 2em;
-    }
-
-    #play-btn {
-        position: absolute;
-        top: 45%;
-        left: 43%;
-        width: 14%;
-        height: 20%;
-        text-align: center;
-    }
-
-    #game-canvas {
-        image-rendering: pixelated;
-        border: 5px solid black;
-        width: 95vw;
-        height: 95vh;
-        display: block;
-        margin: 0 auto;
-    }
-
-    .sprites { display: none }
-</style>
 </html>

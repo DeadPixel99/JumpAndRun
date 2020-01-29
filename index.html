@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>JumpAndJump</title>
+    <script defer src="script.js"></script>
+</head>
+<body>
+    <canvas id="game-canvas">
+
+    </canvas>
+    <div class="sprites">
+        <img id="sGround" src="res/ground100.png"/>
+        <img id="sPlayer" src="res/player.png"/>
+        <img id="sCloud" src="res/cloud.png"/>
+    </div>
+</body>
+<style>
+    body {
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+    }
+
+    #game-canvas {
+        border: 5px solid black;
+        width: 95vw;
+        height: 95vh;
+        display: block;
+        margin: 0 auto;
+    }
+
+    .sprites { display: none }
+</style>
+</html>

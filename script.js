@@ -1,31 +1,38 @@
 (function () {
-    //canvas
     const canvas = document.getElementById("game-canvas");
     const playBtn = document.getElementById("play-btn");
-    const ctx = canvas.getContext('2d');
-    const height = 450;
-    const width = 800;
     const scoreboard = document.getElementById("score");
-    let score = 0;
-    let gameRunning = true;
 
-    //live objects values
-    const playerMaxX = 20;
-    const baseEnemyX = width;
-    let enemies = [{x: baseEnemyX, y: 40}];
-    let playerCurrY = 0;
-    const playerCurrX = 60;
-    let playerFrame = 0;
-    let groundShift = 0;
-    let speed = 1;
-    let playerAnimationCounter = 0;
+    const Game = {
+        gameRunning: true,
+        inJump: false,
+        jumpUp: true,
+        score: 0,
+        speed: 1
+    };
 
-    let inJump = false;
-    let jumpUp = true;
+    const Graphics = {
+        ctx: canvas.getContext('2d'),
+        height: 450,
+        width: 800
+    };
 
-    //decorations
-    let skyEnv = [{w: width - 100, h: 12}];
-    let groundEnv = []; // TODO
+    const Player = {
+        maxX: 20,
+        currY: 0,
+        currX: 60,
+        frame: 0,
+        animationCounter: 0
+    };
+
+    const Env = {
+        baseEnemyX: Graphics.width,
+        enemies: [{x: this.baseEnemyX, y: 40}],
+        skyDecor: [{w: Graphics.width - 100, h: 12}],
+        groundDecor: [],
+        groundShift: 0,
+    };
+
 
     function sprite(name) {
         return document.getElementById(name);
@@ -37,73 +44,73 @@
 
     function randomCloud() {
         if(getRandomInt(100) < 25) {
-            skyEnv.push({w: width - 100, h: getRandomInt(50)})
+            Env.skyDecor.push({w: Graphics.width - 100, h: getRandomInt(50)})
         }
     }
 
     function randomEnemy() {
-        if(enemies.length == 0) {
+        if(Env.enemies.length === 0) {
             eQuantity = getRandomInt(5);
             for(let i = 0; i < eQuantity; i++) {
-                enemies.push({x: baseEnemyX + (i * (getRandomInt(width) + 200)), y: 40});
+                Env.enemies.push({x: Env.baseEnemyX + (i * (getRandomInt(Graphics.width) + 200)), y: 40});
             }
         }
     }
 
     function play() {
         document.getElementById('menu').classList.toggle('sprites');
-        score = 0;
-        gameRunning = true;
+        Game.score = 0;
+        Game.gameRunning = true;
         window.requestAnimationFrame(loop);
         canvas.onclick = () => {
-            if(!inJump) {
-                inJump = true;
+            if(!Game.inJump) {
+                Game.inJump = true;
             }
         };
     }
     
     function makeFrame(playerY = 0, playerX = 0, groundShift = 0) {
-        ctx.fillStyle = '#87CEEB';
-        ctx.fillRect(0,0 , width, height);
+        Graphics.ctx.fillStyle = '#87CEEB';
+        Graphics.ctx.fillRect(0,0 , Graphics.width, Graphics.height);
         for (let i = 0; i < 800 + groundShift; i += 126) { // 126 == ground sprite width
-            ctx.drawImage(sprite('sGround'), i - groundShift, height - 100);
+            Graphics.ctx.drawImage(sprite('sGround'), i - groundShift, Graphics.height - 100);
         }
-        skyEnv.forEach(i => {
-            ctx.drawImage(sprite('sCloud'), 128 + (i.w--), i.h, 128, 128);
-            skyEnv = skyEnv.filter(i => i.w + 256 > 0)
+        Env.skyDecor.forEach(i => {
+            Graphics.ctx.drawImage(sprite('sCloud'), 128 + (i.w--), i.h, 128, 128);
+            Env.skyDecor = Env.skyDecor.filter(i => i.w + 256 > 0)
         });
-        ctx.drawImage(sprite('sPlayer'),playerX, playerY, 46, 50, playerCurrX, height - 192 - playerCurrY, 92, 100);
-        enemies.forEach(i => {
-            ctx.drawImage(sprite('sEnm1'), i.x--, height - 135);
-            enemies = enemies.filter(i => i.x + 100 > 0)
+        Graphics.ctx.drawImage(sprite('sPlayer'),playerX, playerY, 46, 50, Player.currX, Graphics.height - 192 - Player.currY, 92, 100);
+        Env.enemies.forEach(i => {
+            Graphics.ctx.drawImage(sprite('sEnm1'), i.x--, Graphics.height - 135);
+            Env.enemies = Env.enemies.filter(i => i.x + 100 > 0)
         })
     }
 
-    function tick() {
-        makeFrame(150,  46 * playerFrame, groundShift++);
-        tickPostprocessing();
-        score += speed;
-        scoreboard.innerText = score;
+    function scrollIteration() {
+        makeFrame(150,  46 * Player.frame, Env.groundShift++);
+        scrollPostprocessing();
+        Game.score += Game.speed;
+        scoreboard.innerText = Game.score;
     }
 
-    function tickPostprocessing() {
-        if(playerFrame > 7) {
-            playerFrame = 0;
+    function scrollPostprocessing() {
+        if(Player.frame > 7) {
+            Player.frame = 0;
         }
-        if(groundShift > 125) {
-            groundShift = 0;
+        if(Env.groundShift > 125) {
+            Env.groundShift = 0;
         }
-        if(score % Math.pow(10, speed) == 0) {
-            speed++;
+        if(Game.score % Math.pow(10, Game.speed) === 0) {
+            Game.speed++;
         }
-        inJump && processJump();
+        Game.inJump && processJump();
         processEnemy();
         randomEnemy();
     }
     
     function processEnemy() {
-        enemies.forEach(i => {
-            if(i.x <= playerCurrX + 60 && i.x >= playerCurrX && i.y > playerCurrY) {
+        Env.enemies.forEach(i => {
+            if(i.x <= Player.currX + 60 && i.x >= Player.currX && i.y > Player.currY) {
                 gameOver();
             }
         });
@@ -118,20 +125,20 @@
 
     function gameCleanUp() {
         canvas.onclick = null;
-        enemies = [];
-        skyEnv = [];
-        groundEnv = [];
-        inJump = false;
-        playerCurrY = 0;
-        speed = 1;
-        gameRunning = false;
+        Env.enemies = [];
+        Env.skyDecor = [];
+        Env.groundEnv = [];
+        Game.inJump = false;
+        Player.currY = 0;
+        Game.speed = 1;
+        Game.gameRunning = false;
     }
 
     function animationProcessing() {
-        playerAnimationCounter++;
-        if(playerAnimationCounter > 3) {
-            playerAnimationCounter = 0;
-            playerFrame++;
+        Player.animationCounter++;
+        if(Player.animationCounter > 3) {
+            Player.animationCounter = 0;
+            Player.frame++;
         }
     }
     
@@ -140,29 +147,29 @@
     }
 
     function processJump() {
-        playerCurrY += jumpUp ? 1 : -1;
-        if(playerCurrY > 120 && jumpUp) {
-            jumpUp = false;
+        Player.currY += Game.jumpUp ? 1 : -1;
+        if(Player.currY > 120 && Game.jumpUp) {
+            Game.jumpUp = false;
         }
-        if(playerCurrY <= 0 && !jumpUp) {
-            jumpUp = true;
-            inJump = false;
+        if(Player.currY <= 0 && !Game.jumpUp) {
+            Game.jumpUp = true;
+            Game.inJump = false;
         }
+    }
+
+    function loop() {
+        for (let i = 0; i < Game.speed; i++) {
+            scrollIteration();
+        }
+        animationProcessing();
+        decorationsGenerator();
+        Game.gameRunning && window.requestAnimationFrame(loop);
     }
 
     //game
-    canvas.height = height;
-    canvas.width = width;
-    ctx.imageSmoothingEnabled= false;
-
-    function loop() {
-        for (let i = 0; i < speed; i++) {
-            tick();
-        }
-        animationProcessing();
-        gameRunning && window.requestAnimationFrame(loop);
-    }
-
+    canvas.height = Graphics.height;
+    canvas.width = Graphics.width;
+    Graphics.ctx.imageSmoothingEnabled= false;
     makeFrame();
     playBtn.onclick = play;
 

@@ -65,44 +65,38 @@
     function makeFrame(playerY = 0, playerX = 0, groundShift = 0) {
         ctx.fillStyle = '#87CEEB';
         ctx.fillRect(0,0 , width, height);
-        for (let i = 0; i < 800; i += 126) { // 126 == ground sprite width
+        for (let i = 0; i < 800 + groundShift; i += 126) { // 126 == ground sprite width
             ctx.drawImage(sprite('sGround'), i - groundShift, height - 100);
         }
         skyEnv.forEach(i => {
-            ctx.drawImage(sprite('sCloud'), 128 + (i.w-=speed), i.h, 128, 128);
+            ctx.drawImage(sprite('sCloud'), 128 + (i.w--), i.h, 128, 128);
             skyEnv = skyEnv.filter(i => i.w + 256 > 0)
         });
         ctx.drawImage(sprite('sPlayer'),playerX, playerY, 46, 50, playerCurrX, height - 192 - playerCurrY, 92, 100);
         enemies.forEach(i => {
-            ctx.drawImage(sprite('sEnm1'), i.x-=speed, height - 135);
+            ctx.drawImage(sprite('sEnm1'), i.x--, height - 135);
             enemies = enemies.filter(i => i.x + 100 > 0)
         })
     }
 
     function tick() {
-        makeFrame(150,  46 * playerFrame, groundShift += speed);
-        playerAnimationCounter++;
+        makeFrame(150,  46 * playerFrame, groundShift++);
         tickPostprocessing();
         score += speed;
         scoreboard.innerText = score;
     }
 
     function tickPostprocessing() {
-        if(playerAnimationCounter > 3) {
-            playerAnimationCounter = 0;
-            playerFrame++;
-        }
         if(playerFrame > 7) {
             playerFrame = 0;
         }
-        if(groundShift > 17) {
+        if(groundShift > 125) {
             groundShift = 0;
         }
         if(score % Math.pow(10, speed) == 0) {
             speed++;
         }
         inJump && processJump();
-        getRandomInt(100) < 5 && randomCloud();
         processEnemy();
         randomEnemy();
     }
@@ -117,18 +111,36 @@
 
     function gameOver() {
         alert('Game Over');
-        canvas.onclick = null;
-        enemies = [];
-        inJump = false;
-        playerCurrY = 0;
-        speed = 1;
-        gameRunning = false;
+        gameCleanUp();
         makeFrame();
         document.getElementById('menu').classList.toggle('sprites');
     }
 
+    function gameCleanUp() {
+        canvas.onclick = null;
+        enemies = [];
+        skyEnv = [];
+        groundEnv = [];
+        inJump = false;
+        playerCurrY = 0;
+        speed = 1;
+        gameRunning = false;
+    }
+
+    function animationProcessing() {
+        playerAnimationCounter++;
+        if(playerAnimationCounter > 3) {
+            playerAnimationCounter = 0;
+            playerFrame++;
+        }
+    }
+    
+    function decorationsGenerator() {
+        getRandomInt(100) < 5 && randomCloud();
+    }
+
     function processJump() {
-        playerCurrY += jumpUp ? 4 : -4;
+        playerCurrY += jumpUp ? 1 : -1;
         if(playerCurrY > 120 && jumpUp) {
             jumpUp = false;
         }
@@ -144,7 +156,10 @@
     ctx.imageSmoothingEnabled= false;
 
     function loop() {
-        tick();
+        for (let i = 0; i < speed; i++) {
+            tick();
+        }
+        animationProcessing();
         gameRunning && window.requestAnimationFrame(loop);
     }
 

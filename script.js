@@ -166,7 +166,7 @@
         Game.gameRunning && window.requestAnimationFrame(loop);
     }
 
-    //game
+    //GAME
     canvas.height = Graphics.height;
     canvas.width = Graphics.width;
     Graphics.ctx.imageSmoothingEnabled= false;
